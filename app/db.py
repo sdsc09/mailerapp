@@ -8,9 +8,9 @@ def get_db():
         url = os.getenv("DATABASE_URL")
         if not url:
             raise RuntimeError("DATABASE_URL no está configurada")
-        connection = psycopg2.connect(url, sslmode='require')
-        g.db = connection
-        g.c = connection.cursor()
+        # Usa sslmode=require para Render
+        g.db = psycopg2.connect(url, sslmode='require')
+        g.c = g.db.cursor()
     return g.db, g.c
 
 def close_db(e=None):
