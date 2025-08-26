@@ -25,8 +25,9 @@ def create():
         email = request.form.get('email')
         subject = request.form.get('subject')
         content = request.form.get('content')
-        errors = []
+        print(f"📬 Datos recibidos: email={email}, subject={subject}, content={content}")  # ✅ Depuración
 
+        errors = []
         if not email:
             errors.append('Email es obligatorio')
         if not subject:
@@ -35,29 +36,30 @@ def create():
             errors.append('Contenido es obligatorio')
 
         if len(errors) == 0:
-            print("✅ No hay errores. Intentando guardar correo...")
-            print(f"Datos: email={email}, subject={subject}, content={content}")
             try:
-                send_email(email, subject, content)
+                print("✅ No hay errores. Intentando guardar...")  # ✅
                 db, c = get_db()
-                print("Conexión a DB obtenida")
+                print("🔗 Conexión a DB obtenida")  # ✅
+
                 c.execute(
                     "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
                     (email, subject, content)
                 )
-                db.commit()
-                print("✅ Correo guardado en la base de datos")
+                print("📥 INSERT ejecutado")  # ✅
+
+                db.commit()  # ✅ ¡Obligatorio!
+                print("💾 Cambios guardados con commit")  # ✅
+
                 flash("Correo enviado y guardado correctamente")
                 return redirect(url_for('mail.index'))
             except Exception as e:
-                print("❌ Error al guardar el correo:", e)
-                flash(f"Error al guardar el correo: {str(e)}")
+                print("❌ Error al guardar:", e)  # ✅ Este debe aparecer si falla
+                flash(f"Error al guardar: {str(e)}")
         else:
             for error in errors:
                 flash(error)
-
     return render_template('mails/create.html')
-
+    
 def send_email(to, subject, content):
     try:
         sg = sendgrid.SendGridAPIClient(api_key=current_app.config['SENDGRID_KEY'])
@@ -69,4 +71,5 @@ def send_email(to, subject, content):
         print("SendGrid response:", response.status_code)
     except Exception as e:
         print("Error al enviar correo:", e)
+
 
