@@ -1,22 +1,22 @@
-from flask import (
-    Blueprint, render_template, request, flash, url_for, redirect, current_app
-)
+from flask import Blueprint, render_template, request, flash, url_for, redirect, current_app
 import sendgrid
-import traceback
-from sendgrid.helpers.mail import *
-
+from sendgrid.helpers.mail import Mail as SendGridMail, Email, To, Content
 from app.db import get_db
 
 bp = Blueprint('mail', __name__, url_prefix="/")
 
 @bp.route('/', methods=['GET'])
 def index():
+    search = request.args.get('search')  # Usa paréntesis, no corchetes
     db, c = get_db()
-    
-    c.execute("SELECT * FROM email")
+
+    if search:
+        query = "SELECT * FROM email WHERE email ILIKE %s"
+        c.execute(query, (f'%{search}%',))
+    else:
+        c.execute("SELECT * FROM email")
+
     mails = c.fetchall()
-    
-    print(mails)
     return render_template('mails/index.html', mails=mails)
 
 @bp.route('/create', methods=['GET', 'POST'])
@@ -25,36 +25,34 @@ def create():
         email = request.form.get('email')
         subject = request.form.get('subject')
         content = request.form.get('content')
-        errors= []
-        
+        errors = []
+
         if not email:
             errors.append('Email es obligatorio')
         if not subject:
             errors.append('Asunto es obligatorio')
         if not content:
             errors.append('Contenido es obligatorio')
-            
+
         if len(errors) == 0:
-            send(email, subject, content)
-            db, c =get_db()
-            c.execute("INSERT INTO email (email, subject, content) VALUES(%s, %s, %s)", (email, subject, content))
+            send_email(email, subject, content)
+            db, c = get_db()
+            c.execute(
+                "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
+                (email, subject, content)
+            )
             db.commit()
-            
             return redirect(url_for('mail.index'))
         else:
             for error in errors:
                 flash(error)
-    return render_template('mails/create.html') 
+    return render_template('mails/create.html')
 
-def send(to, subject, content):
+def send_email(to, subject, content):
     sg = sendgrid.SendGridAPIClient(api_key=current_app.config['SENDGRID_KEY'])
     from_email = Email(current_app.config['FROM_EMAIL'])
     to_email = To(to)
     content = Content('text/plain', content)
-    mail = Mail(from_email, to_email, subject, content)
+    mail = SendGridMail(from_email, to_email, subject, content)
     response = sg.client.mail.send.post(request_body=mail.get())
     print(response)
-    
-    print("SENDGRID_KEY:", current_app.config.get('SENDGRID_KEY'))
-
-       
