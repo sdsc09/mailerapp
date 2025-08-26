@@ -7,7 +7,7 @@ bp = Blueprint('mail', __name__, url_prefix="/")
 
 @bp.route('/', methods=['GET'])
 def index():
-    search = request.args.get('search')  # Usa paréntesis, no corchetes
+    search = request.args.get('search')
     db, c = get_db()
 
     if search:
@@ -35,24 +35,31 @@ def create():
             errors.append('Contenido es obligatorio')
 
         if len(errors) == 0:
-            send_email(email, subject, content)
-            db, c = get_db()
-            c.execute(
-                "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
-                (email, subject, content)
-            )
-            db.commit()
-            return redirect(url_for('mail.index'))
+            try:
+                send_email(email, subject, content)
+                db, c = get_db()
+                c.execute(
+                    "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
+                    (email, subject, content)
+                )
+                db.commit()
+                flash("Correo enviado y guardado correctamente")
+                return redirect(url_for('mail.index'))
+            except Exception as e:
+                flash(f"Error al guardar el correo: {str(e)}")
         else:
             for error in errors:
                 flash(error)
     return render_template('mails/create.html')
 
 def send_email(to, subject, content):
-    sg = sendgrid.SendGridAPIClient(api_key=current_app.config['SENDGRID_KEY'])
-    from_email = Email(current_app.config['FROM_EMAIL'])
-    to_email = To(to)
-    content = Content('text/plain', content)
-    mail = SendGridMail(from_email, to_email, subject, content)
-    response = sg.client.mail.send.post(request_body=mail.get())
-    print(response)
+    try:
+        sg = sendgrid.SendGridAPIClient(api_key=current_app.config['SENDGRID_KEY'])
+        from_email = Email(current_app.config['FROM_EMAIL'])
+        to_email = To(to)
+        content = Content('text/plain', content)
+        mail = SendGridMail(from_email, to_email, subject, content)
+        response = sg.client.mail.send.post(request_body=mail.get())
+        print("SendGrid response:", response.status_code)
+    except Exception as e:
+        print("Error al enviar correo:", e)
