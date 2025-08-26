@@ -1,4 +1,4 @@
-import psycopg2
+import psycopg
 import os
 from urllib.parse import urlparse
 from flask import g
@@ -9,7 +9,7 @@ def get_db():
         if not url:
             raise RuntimeError("DATABASE_URL no está configurada")
         # Usa sslmode=require para Render
-        g.db = psycopg2.connect(url, sslmode='require')
+        g.db = psycopg.connect(url, sslmode='require')
         g.c = g.db.cursor()
     return g.db, g.c
 
