@@ -35,21 +35,27 @@ def create():
             errors.append('Contenido es obligatorio')
 
         if len(errors) == 0:
+            print("✅ No hay errores. Intentando guardar correo...")
+            print(f"Datos: email={email}, subject={subject}, content={content}")
             try:
                 send_email(email, subject, content)
                 db, c = get_db()
+                print("Conexión a DB obtenida")
                 c.execute(
                     "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
                     (email, subject, content)
                 )
                 db.commit()
+                print("✅ Correo guardado en la base de datos")
                 flash("Correo enviado y guardado correctamente")
                 return redirect(url_for('mail.index'))
             except Exception as e:
+                print("❌ Error al guardar el correo:", e)
                 flash(f"Error al guardar el correo: {str(e)}")
         else:
             for error in errors:
                 flash(error)
+
     return render_template('mails/create.html')
 
 def send_email(to, subject, content):
