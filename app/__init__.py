@@ -3,7 +3,7 @@ from flask import Flask
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = 'your-secret-key-here'  # Necesario para flash()
+    app.secret_key = 'tu_clave_secreta_aqui'  # Necesario para flash()
 
     # Configuración desde variables de entorno
     app.config.from_mapping(
@@ -23,6 +23,6 @@ def create_app():
     @app.route('/init-db')
     def init_db_route():
         db.init_db()
-        return "Base de datos inicializada. La tabla 'email' ha sido creada."
+        return "✅ Base de datos inicializada. La tabla 'email' ha sido creada."
 
     return app
