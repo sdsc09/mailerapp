@@ -1,6 +1,5 @@
 import psycopg
 import os
-from urllib.parse import urlparse
 from flask import g
 from .schema import instructions
 
@@ -9,7 +8,6 @@ def get_db():
         url = os.getenv("DATABASE_URL")
         if not url:
             raise RuntimeError("DATABASE_URL no está configurada")
-        # Usa sslmode=require para Render
         g.db = psycopg.connect(url, sslmode='require')
         g.c = g.db.cursor()
     return g.db, g.c
@@ -27,4 +25,4 @@ def init_db():
 
 def init_app(app):
     app.teardown_appcontext(close_db)
-    # No agregamos el comando CLI porque usamos /init-db como ruta web
+
