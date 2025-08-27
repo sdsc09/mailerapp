@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 
+
 def create_app():
     app = Flask(__name__)
     app.secret_key = 'tu_clave_secreta_aqui'  # Necesario para flash()
@@ -11,26 +12,23 @@ def create_app():
         FROM_EMAIL=os.environ.get('FROM_EMAIL')
     )
 
-    # Inicializa la base de datos
+    # Importa y registra el blueprint
     from . import db
     db.init_app(app)
 
-    # Registra el blueprint
     from . import mail
     app.register_blueprint(mail.bp)
 
-    # Ruta para inicializar la base de datos
+    # Ruta directa en la app principal para /init-db
     @app.route('/init-db')
     def init_db_route():
         db.init_db()
         return "✅ Base de datos inicializada. La tabla 'email' ha sido creada."
 
-    @app.route('/test-query')
-    def test_query():
-        from .db import get_db
-        db, c = get_db()
-        c.execute("SELECT * FROM email")
-        mails = c.fetchall()
-        return str(mails)
-    
+    # Ruta raíz, por si alguien entra directamente
+    @app.route('/')
+    def index():
+        from flask import redirect, url_for
+        return redirect(url_for('mail.index'))
+
     return app
