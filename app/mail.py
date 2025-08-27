@@ -27,7 +27,7 @@ def create():
         email = request.form.get('email')
         subject = request.form.get('subject')
         content = request.form.get('content')
-        print(f"📬 Datos recibidos: email={email}, subject={subject}, content={content}")
+        print(f"📬 Datos recibidos: email={email}, subject={subject}, content={content}")  # ✅ Depuración
 
         errors = []
         if not email:
@@ -39,33 +39,28 @@ def create():
 
         if len(errors) == 0:
             try:
+                print("✅ No hay errores. Intentando guardar...")  # ✅
                 db, c = get_db()
-                print("🔗 Conexión a DB obtenida")
+                print("🔗 Conexión a DB obtenida")  # ✅
 
-                # 👇 Postgres usa %s
                 c.execute(
                     "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
                     (email, subject, content)
                 )
-                print("📥 INSERT ejecutado")
+                print("📥 INSERT ejecutado")  # ✅
 
-                db.commit()
-                print("💾 Cambios guardados con commit")
-
-                # Enviar correo con SendGrid
-                send_email(email, subject, content)
+                db.commit()  # ✅ ¡Obligatorio!
+                print("💾 Cambios guardados con commit")  # ✅
 
                 flash("Correo enviado y guardado correctamente")
                 return redirect(url_for('mail.index'))
             except Exception as e:
-                print("❌ Error al guardar:", e)
+                print("❌ Error al guardar:", e)  # ✅ Este debe aparecer si falla
                 flash(f"Error al guardar: {str(e)}")
         else:
             for error in errors:
                 flash(error)
-
     return render_template('mails/create.html')
-
 
 def send_email(to, subject, content):
     """Enviar correo real usando SendGrid"""
