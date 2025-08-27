@@ -11,13 +11,15 @@ def index():
     db, c = get_db()
 
     if search:
+        # En Postgres usamos ILIKE y %s
         query = "SELECT * FROM email WHERE email ILIKE %s"
         c.execute(query, (f'%{search}%',))
     else:
-        c.execute("SELECT * FROM email")
+        c.execute("SELECT * FROM email ORDER BY id DESC")
 
     mails = c.fetchall()
     return render_template('mails/index.html', mails=mails)
+
 
 @bp.route('/create', methods=['GET', 'POST'])
 def create():
@@ -25,7 +27,7 @@ def create():
         email = request.form.get('email')
         subject = request.form.get('subject')
         content = request.form.get('content')
-        print(f"📬 Datos recibidos: email={email}, subject={subject}, content={content}")  # ✅ Depuración
+        print(f"📬 Datos recibidos: email={email}, subject={subject}, content={content}")
 
         errors = []
         if not email:
@@ -37,30 +39,36 @@ def create():
 
         if len(errors) == 0:
             try:
-                print("✅ No hay errores. Intentando guardar...")  # ✅
                 db, c = get_db()
-                print("🔗 Conexión a DB obtenida")  # ✅
+                print("🔗 Conexión a DB obtenida")
 
+                # 👇 Postgres usa %s
                 c.execute(
                     "INSERT INTO email (email, subject, content) VALUES (%s, %s, %s)",
                     (email, subject, content)
                 )
-                print("📥 INSERT ejecutado")  # ✅
+                print("📥 INSERT ejecutado")
 
-                db.commit()  # ✅ ¡Obligatorio!
-                print("💾 Cambios guardados con commit")  # ✅
+                db.commit()
+                print("💾 Cambios guardados con commit")
+
+                # Enviar correo con SendGrid
+                send_email(email, subject, content)
 
                 flash("Correo enviado y guardado correctamente")
                 return redirect(url_for('mail.index'))
             except Exception as e:
-                print("❌ Error al guardar:", e)  # ✅ Este debe aparecer si falla
+                print("❌ Error al guardar:", e)
                 flash(f"Error al guardar: {str(e)}")
         else:
             for error in errors:
                 flash(error)
+
     return render_template('mails/create.html')
-    
+
+
 def send_email(to, subject, content):
+    """Enviar correo real usando SendGrid"""
     try:
         sg = sendgrid.SendGridAPIClient(api_key=current_app.config['SENDGRID_KEY'])
         from_email = Email(current_app.config['FROM_EMAIL'])
@@ -68,8 +76,6 @@ def send_email(to, subject, content):
         content = Content('text/plain', content)
         mail = SendGridMail(from_email, to_email, subject, content)
         response = sg.client.mail.send.post(request_body=mail.get())
-        print("SendGrid response:", response.status_code)
+        print("📨 SendGrid response:", response.status_code)
     except Exception as e:
-        print("Error al enviar correo:", e)
-
-
+        print("❌ Error al enviar correo:", e)
