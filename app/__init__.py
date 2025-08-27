@@ -9,7 +9,11 @@ def create_app():
     # Configuración desde variables de entorno
     app.config.from_mapping(
         SENDGRID_KEY=os.environ.get('SENDGRID_KEY'),
-        FROM_EMAIL=os.environ.get('FROM_EMAIL')
+        FROM_EMAIL=os.environ.get('FROM_EMAIL'),
+        DATABASE_HOST=os.environ.get('DATABASE_HOST'),
+        DATABASE_USER=os.environ.get('DATABASE_USER'),
+        DATABASE_PASSWORD=os.environ.get('DATABASE_PASSWORD'),
+        DATABAS=os.environ.get('DATABASE')
     )
 
     # Importa y registra el blueprint
