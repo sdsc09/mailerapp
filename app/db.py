@@ -9,7 +9,10 @@ import psycopg2.extras
 def get_db():
     if 'db' not in g:
         g.db = psycopg2.connect(
-            "postgresql://mailerapp_db_user:kgrSR6CA1TL1SvjyZ2umzEYDgHMOZU5Y@dpg-d2n2pvffte5s73bfauhg-a/mailerapp_db"
+            host=current_app.config['DATABASE_HOST'],
+            user=current_app.config['DATABASE_USER'],
+            password=current_app.config['DATABASE_PASSWORD'],
+            dbname=current_app.config['DATABASE']
         )
         g.c = g.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 👈 clave
     return g.db, g.c
