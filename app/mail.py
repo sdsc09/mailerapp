@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, url_for, redirect,
 import sendgrid
 from sendgrid.helpers.mail import Mail as SendGridMail, Email, To, Content
 from app.db import get_db
+import psycopg2
 
 bp = Blueprint('mail', __name__, url_prefix="/")
 
@@ -9,16 +10,30 @@ bp = Blueprint('mail', __name__, url_prefix="/")
 def index():
     search = request.args.get('search')
     db, c = get_db()
-    if search:
-        # En Postgres usamos LIKE y %s
-        query = "SELECT * FROM email WHERE email LIKE %s"
-        c.execute(query, (f'%{search}%',))
-    else:
-        c.execute("SELECT * FROM email ORDER BY id DESC")
+    # if search:
+    #     # En Postgres usamos LIKE y %s
+    #     query = "SELECT * FROM email WHERE email LIKE %s"
+    #     c.execute(query, (f'%{search}%',))
+    # else:
+    #     c.execute("SELECT * FROM email ORDER BY id DESC")
 
-    mails = c.fetchall()
+    # mails = c.fetchall()
+    # return render_template('mails/index.html', mails=mails)
+    c = db.cursor(cursor_factory=psycopg2.extras.RealDictCursor) 
+
+    try:
+        if search:
+            query = "SELECT * FROM email WHERE email LIKE %s"
+            c.execute(query, (f'%{search}%',))
+        else:
+            c.execute("SELECT * FROM email ORDER BY id DESC")
+
+        mails = c.fetchall()
+    finally:
+        c.close()
+        db.close()
+
     return render_template('mails/index.html', mails=mails)
-
 
 @bp.route('/create', methods=['GET', 'POST'])
 def create():
