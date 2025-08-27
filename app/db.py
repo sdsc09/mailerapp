@@ -1,16 +1,22 @@
 import psycopg
 import os
-from flask import g
+import psycopg2.extras
+from flask import g, current_app
 from .schema import instructions
+
+import psycopg2.extras
 
 def get_db():
     if 'db' not in g:
-        url = os.getenv("DATABASE_URL")
-        if not url:
-            raise RuntimeError("DATABASE_URL no está configurada")
-        g.db = psycopg.connect(url, sslmode='require')
-        g.c = g.db.cursor()
+        g.db = psycopg2.connect(
+            host=current_app.config['DATABASE_HOST'],
+            user=current_app.config['DATABASE_USER'],
+            password=current_app.config['DATABASE_PASSWORD'],
+            dbname=current_app.config['DATABASE']
+        )
+        g.c = g.db.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 👈 clave
     return g.db, g.c
+
 
 def close_db(e=None):
     db = g.pop('db', None)
@@ -25,4 +31,3 @@ def init_db():
 
 def init_app(app):
     app.teardown_appcontext(close_db)
-
