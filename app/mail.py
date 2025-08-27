@@ -11,8 +11,8 @@ def index():
     db, c = get_db()
 
     if search:
-        # En Postgres usamos ILIKE y %s
-        query = "SELECT * FROM email WHERE email ILIKE %s"
+        # En Postgres usamos LIKE y %s
+        query = "SELECT * FROM email WHERE email LIKE %s"
         c.execute(query, (f'%{search}%',))
     else:
         c.execute("SELECT * FROM email ORDER BY id DESC")
@@ -73,4 +73,5 @@ def send_email(to, subject, content):
         print("📨 SendGrid response:", response.status_code)
     except Exception as e:
         print("❌ Error al enviar correo:", e)
+
 
