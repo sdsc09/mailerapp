@@ -25,4 +25,12 @@ def create_app():
         db.init_db()
         return "✅ Base de datos inicializada. La tabla 'email' ha sido creada."
 
+    @app.route('/test-query')
+    def test_query():
+        from .db import get_db
+        db, c = get_db()
+        c.execute("SELECT * FROM email")
+        mails = c.fetchall()
+        return str(mails)
+    
     return app
