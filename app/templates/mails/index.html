@@ -10,7 +10,7 @@
 
 {% block content %}
     {% if mails %}
-                <ul>
+        <ul>
                     {% for mail in mails %}
             <li class="mail">
                 <div>
@@ -21,17 +21,6 @@
                 </div>
             </li>
     {% endfor %}
-
-            {% comment %} {% for mail in mails %}
-            <li class="mail">
-                <div>
-                    <span class="email">{{ mail[1] }}</span>
-                    <span class="subject"><b>{{ mail[2] }}</b></span>
-                    <hr>
-                    <p class="mail-content">{{ mail[3] }}</p>
-                </div>
-            </li>
-            {% endfor %} {% endcomment %}
         </ul>
     {% else %}
         <p>No hay correos enviados todavía.</p>
