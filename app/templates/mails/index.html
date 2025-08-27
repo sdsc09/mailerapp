@@ -9,21 +9,20 @@
 {% endblock %}
 
 {% block content %}
-<span class="email">{{ count }}</span>
-    {% comment %} {% if mails %}
-    <ul>
-        {% for mail in mails %}
-        <li class="mail">
-            <div>
-                <span class="email">{{ mail[1] }}</span>
-                <span class="subject"><b>{{ mail[2] }}</b></span>
-                <hr>
-                <p class="mail-content">{{ mail[3] }}</p>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+    {% if mails %}
+        <ul>
+            {% for mail in mails %}
+            <li class="mail">
+                <div>
+                    <span class="email">{{ mail[1] }}</span>
+                    <span class="subject"><b>{{ mail[2] }}</b></span>
+                    <hr>
+                    <p class="mail-content">{{ mail[3] }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
     {% else %}
         <p>No hay correos enviados todavía.</p>
-    {% endif %} {% endcomment %}
+    {% endif %} 
 {% endblock %}
