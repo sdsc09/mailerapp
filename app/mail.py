@@ -9,16 +9,18 @@ bp = Blueprint('mail', __name__, url_prefix="/")
 def index():
     search = request.args.get('search')
     db, c = get_db()
+    c.execute("SELECT COUNT(*) FROM email")
+    count = c.fetchone()[0]
+    # if search:
+    #     # En Postgres usamos ILIKE y %s
+    #     query = "SELECT * FROM email WHERE email ILIKE %s"
+    #     c.execute(query, (f'%{search}%',))
+    # else:
+    #     c.execute("SELECT * FROM email ORDER BY id DESC")
 
-    if search:
-        # En Postgres usamos LIKE y %s
-        query = "SELECT * FROM email WHERE email LIKE %s"
-        c.execute(query, (f'%{search}%',))
-    else:
-        c.execute("SELECT * FROM email ORDER BY id DESC")
+    # mails = c.fetchall()
+    return render_template('mails/index.html', count=count)
 
-    mails = c.fetchall()
-    return render_template('mails/index.html', mails=mails)
 
 @bp.route('/create', methods=['GET', 'POST'])
 def create():
@@ -73,5 +75,3 @@ def send_email(to, subject, content):
         print("📨 SendGrid response:", response.status_code)
     except Exception as e:
         print("❌ Error al enviar correo:", e)
-
-
