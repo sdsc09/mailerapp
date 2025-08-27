@@ -10,8 +10,8 @@ def index():
     search = request.args.get('search')
     db, c = get_db()
     if search:
-        # En Postgres usamos ILIKE y %s
-        query = "SELECT * FROM email WHERE email ILIKE %s"
+        # En Postgres usamos LIKE y %s
+        query = "SELECT * FROM email WHERE email LIKE %s"
         c.execute(query, (f'%{search}%',))
     else:
         c.execute("SELECT * FROM email ORDER BY id DESC")
