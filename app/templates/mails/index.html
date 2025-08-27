@@ -1,23 +1,28 @@
 {% extends "base.html" %}
 
 {% block header %}
-    <h1>{% block title %}Correos enviados{% endblock  %}</h1>
-{% endblock  %}
+    <h1>{% block title %}Correos enviados{% endblock %}</h1>
+{% endblock %}
 
 {% block action %}
-    <a class='button' href='{{ url_for('mail.create') }}'>Nuevo correo</a>
-{% endblock  %}
+    <a class="button" href="{{ url_for('mail.create') }}">Nuevo correo</a>
+{% endblock %}
+
 {% block content %}
-<ul>
-    {% for mail in mails %}
-        <li class='mail'>
+    {% if mails %}
+    <ul>
+        {% for mail in mails %}
+        <li class="mail">
             <div>
-                <span class='email'>{{ mail['email'] }}</span>
-                <span class='subject'>{{ mail['subject'] }}</span>
+                <span class="email">{{ mail[1] }}</span>   {# columna email #}
+                <span class="subject"><b>{{ mail[2] }}</b></span>  {# columna subject #}
                 <hr>
-                <p class='mail-content'>{{ mail['content'] }}</p>
+                <p class="mail-content">{{ mail[3] }}</p>  {# columna content #}
             </div>
         </li>
-    {% endfor %}
-</ul>
-{% endblock  %}
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay correos enviados todavía.</p>
+    {% endif %}
+{% endblock %}
